@@ -1,51 +1,70 @@
 """下载 Home Credit Default Risk 竞赛主表 application_train.csv。
 
-凭据优先读 ~/.kaggle/kaggle.json，其次读环境变量 KAGGLE_USERNAME / KAGGLE_KEY。
-原始数据不提交到公开仓库（/data/ 已 gitignore）。
+认证：读取 KAGGLE_API_TOKEN（Kaggle 新版 API token，形如 KGAT_xxx），
+用 Authorization: Bearer <token> 请求。
 
-获取 API token：https://www.kaggle.com/settings → API → Create New Token
+前置条件：
+1. 需先在 Kaggle 网页接受该竞赛规则（否则 403）：
+   https://www.kaggle.com/competitions/home-credit-default-risk/rules
+2. 必须带浏览器 User-Agent（Kaggle 对 requests 默认 UA 返回 404）。
+
+注意：Kaggle 返回的是 application_train.csv.zip，需解压。
 """
 from __future__ import annotations
 
-import json
 import os
+import zipfile
 from pathlib import Path
 
+from dotenv import load_dotenv
 import requests
+
+load_dotenv()
 
 RAW = Path(__file__).resolve().parents[1] / "data" / "raw"
 COMPETITION = "home-credit-default-risk"
 FILENAME = "application_train.csv"
 
+BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+)
 
-def load_credentials() -> tuple[str, str]:
-    """读取 Kaggle 凭据（kaggle.json 或环境变量），不写入仓库。"""
-    kaggle_json = Path.home() / ".kaggle" / "kaggle.json"
-    if kaggle_json.exists():
-        creds = json.loads(kaggle_json.read_text())
-        return creds["username"], creds["key"]
-    username = os.getenv("KAGGLE_USERNAME")
-    key = os.getenv("KAGGLE_KEY")
-    if username and key:
-        return username, key
-    raise RuntimeError(
-        "未找到 Kaggle 凭据。请把 kaggle.json 放到 ~/.kaggle/ 目录，"
-        "或设置 KAGGLE_USERNAME / KAGGLE_KEY 环境变量。"
-    )
+
+def load_token() -> str:
+    token = os.getenv("KAGGLE_API_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "未找到 KAGGLE_API_TOKEN。请在 .env 中设置，或 export KAGGLE_API_TOKEN=KGAT_xxx"
+        )
+    return token
 
 
 def main() -> None:
-    username, key = load_credentials()
+    token = load_token()
     url = (
         f"https://www.kaggle.com/api/v1/competitions/data/download/"
         f"{COMPETITION}/{FILENAME}"
     )
+    headers = {"Authorization": f"Bearer {token}", "User-Agent": BROWSER_UA}
     print(f"下载 {FILENAME} ...")
-    resp = requests.get(url, auth=(username, key), timeout=600)
+    resp = requests.get(url, headers=headers, timeout=600)
+    if resp.status_code == 403:
+        raise RuntimeError(
+            "403：需先在 Kaggle 网页接受该竞赛规则。打开 "
+            "https://www.kaggle.com/competitions/home-credit-default-risk/rules "
+            "点击 I Understand and Accept。"
+        )
     resp.raise_for_status()
+
+    # Kaggle 返回的是 zip 包
+    zip_path = RAW / f"{FILENAME}.zip"
+    zip_path.write_bytes(resp.content)
+    with zipfile.ZipFile(zip_path) as zf:
+        zf.extract(FILENAME, RAW)
+    zip_path.unlink()
     out = RAW / FILENAME
-    out.write_bytes(resp.content)
-    print(f"已保存: {out} ({len(resp.content) / 1e6:.1f} MB)")
+    print(f"已保存: {out} ({out.stat().st_size / 1e6:.1f} MB)")
 
 
 if __name__ == "__main__":
