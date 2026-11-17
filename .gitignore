@@ -25,3 +25,7 @@ wheels/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# 实验运行锁 / 停止标记
+experiments/**/run.lock
+experiments/**/STOP
