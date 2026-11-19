@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "data": "data/raw/application_train.csv",
+    "seed": 42,
+    "dropped_gt95pct_missing": []
+  },
+  "lr": {
+    "metrics": {
+      "auc": 0.7525,
+      "ks": 0.3734,
+      "pr_auc": 0.2369,
+      "brier": 0.0681
+    },
+    "cv_auc_mean": 0.7499,
+    "cv_auc_std": 0.0028,
+    "train_time_s": 0.422,
+    "inference_time_s": 0.1031,
+    "top_features": {
+      "INQ_TOTAL": 0.61867,
+      "AMT_REQ_CREDIT_BUREAU_YEAR": 0.51433,
+      "EXT_SOURCE_3": 0.41361,
+      "AMT_GOODS_PRICE": 0.38334,
+      "EXT_SOURCE_2": 0.26478,
+      "AMT_REQ_CREDIT_BUREAU_MON": 0.23149,
+      "NONLIVINGAPARTMENTS_MODE": 0.21322,
+      "AMT_ANNUITY": 0.17265,
+      "BASEMENTAREA_MEDI": 0.16223,
+      "AGE_FIRST_EMPLOYED": 0.15468,
+      "EXT_SOURCE_1": 0.15123,
+      "BASEMENTAREA_AVG": 0.14318,
+      "EXT_SOURCE_MEAN": 0.13731,
+      "REGION_RATING_CLIENT_W_CITY": 0.13382,
+      "AMT_CREDIT": 0.13285
+    }
+  },
+  "lgbm": {
+    "metrics": {
+      "auc": 0.7691,
+      "ks": 0.4012,
+      "pr_auc": 0.2565,
+      "brier": 0.0672
+    },
+    "cv_auc_mean": 0.7641,
+    "cv_auc_std": 0.0037,
+    "train_time_s": 3.709,
+    "inference_time_s": 0.0584,
+    "best_iter": 250,
+    "top_features": {
+      "EXT_SOURCE_MEAN": 74617,
+      "EXT_SOURCE_MIN": 19624,
+      "ORGANIZATION_TYPE": 18284,
+      "RATIO_ANNUITY_CREDIT": 16670,
+      "EXT_SOURCE_MAX": 10367,
+      "EXT_SOURCE_3": 9727,
+      "RATIO_CREDIT_GOODS": 9197,
+      "EXT_SOURCE_1": 4643,
+      "AGE_FIRST_EMPLOYED": 3919,
+      "AMT_ANNUITY": 3752,
+      "DAYS_EMPLOYED": 3687,
+      "OCCUPATION_TYPE": 3476,
+      "AMT_GOODS_PRICE": 3317,
+      "OWN_CAR_AGE": 3287,
+      "DAYS_BIRTH": 2994
+    }
+  }
+}
